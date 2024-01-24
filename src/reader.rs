@@ -2,12 +2,16 @@
 
 use crate::stdlib::cmp;
 use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::convert::TryInto;
+use crate::stdlib::io::Read;
+use crate::stdlib::string::ToString;
+use crate::stdlib::vec::Vec;
+use crate::stdlib::Mutex;
 use log::{error, warn};
-use std::convert::TryInto;
+#[cfg(feature = "std")]
 use std::fs::File;
-use std::io::Read;
+#[cfg(feature = "std")]
 use std::path::Path;
-use std::sync::Mutex;
 
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
@@ -24,6 +28,7 @@ type FilterFunc = fn((u32, u16), &mut Object) -> Option<((u32, u16), Object)>;
 impl Document {
     /// Load a PDF document from a specified file path.
     #[inline]
+    #[cfg(feature = "std")]
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Document> {
         let file = File::open(path)?;
         let capacity = Some(file.metadata()?.len() as usize);
@@ -31,6 +36,7 @@ impl Document {
     }
 
     #[inline]
+    #[cfg(feature = "std")]
     pub fn load_filtered<P: AsRef<Path>>(path: P, filter_func: FilterFunc) -> Result<Document> {
         let file = File::open(path)?;
         let capacity = Some(file.metadata()?.len() as usize);
@@ -77,6 +83,7 @@ impl TryInto<Document> for &[u8] {
 impl IncrementalDocument {
     /// Load a PDF document from a specified file path.
     #[inline]
+    #[cfg(feature = "std")]
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
         let file = File::open(path)?;
         let capacity = Some(file.metadata()?.len() as usize);
@@ -198,7 +205,10 @@ impl<'a> Reader<'a> {
                 if let Ok(ref mut stream) = object.as_stream_mut() {
                     if stream.dict.type_is(b"ObjStm") {
                         let obj_stream = ObjectStream::new(stream).ok()?;
-                        let mut object_streams = object_streams.lock().unwrap();
+                        let object_streams = object_streams.lock();
+                        #[cfg(feature = "std")]
+                        let object_streams = object_streams.unwrap();
+                        let mut object_streams = object_streams;
                         // TODO: Is insert and replace intended behavior?
                         // See https://github.com/J-F-Liu/lopdf/issues/160 for more info
                         if let Some(filter_func) = filter_func {
@@ -212,7 +222,10 @@ impl<'a> Reader<'a> {
                             object_streams.extend(obj_stream.objects);
                         }
                     } else if stream.content.is_empty() {
-                        let mut zero_length_streams = zero_length_streams.lock().unwrap();
+                        let zero_length_streams = zero_length_streams.lock();
+                        #[cfg(feature = "std")]
+                        let zero_length_streams = zero_length_streams.unwrap();
+                        let mut zero_length_streams = zero_length_streams;
                         zero_length_streams.push(object_id);
                     }
                 }
@@ -242,11 +255,17 @@ impl<'a> Reader<'a> {
                 .collect();
         }
         // Only add entries, but never replace entries
-        for (id, entry) in object_streams.into_inner().unwrap() {
+        let iter = object_streams.into_inner();
+        #[cfg(feature = "std")]
+        let iter = iter.unwrap();
+        for (id, entry) in iter {
             self.document.objects.entry(id).or_insert(entry);
         }
 
-        for object_id in zero_length_streams.into_inner().unwrap() {
+        let iter = zero_length_streams.into_inner();
+        #[cfg(feature = "std")]
+        let iter = iter.unwrap();
+        for object_id in iter {
             let _ = self.set_stream_content(object_id);
         }
 
@@ -359,6 +378,7 @@ impl<'a> Reader<'a> {
 }
 
 #[test]
+#[cfg(feature = "std")]
 fn load_document() {
     let mut doc = Document::load("assets/example.pdf").unwrap();
     assert_eq!(doc.version, "1.5");
@@ -377,7 +397,7 @@ fn load_short_document() {
 
 #[test]
 fn load_many_shallow_brackets() {
-    let content: String = crate::stdlib::iter::repeat("()")
+    let content: crate::stdlib::string::String = crate::stdlib::iter::repeat("()")
         .take(MAX_BRACKET * 10)
         .flat_map(|x| x.chars())
         .collect();
@@ -427,7 +447,7 @@ fn load_too_deep_brackets() {
         .take(MAX_BRACKET + 1)
         .chain(crate::stdlib::iter::repeat(b')').take(MAX_BRACKET + 1))
         .collect();
-    let content = String::from_utf8(content).unwrap();
+    let content = crate::stdlib::string::String::from_utf8(content).unwrap();
     const STREAM_CRUFT: usize = 33;
     let doc = format!(
         "%PDF-1.5

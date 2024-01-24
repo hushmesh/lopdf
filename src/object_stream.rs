@@ -3,7 +3,9 @@
 use crate::parser;
 use crate::stdlib::cmp::max;
 use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::str;
 use crate::stdlib::str::FromStr;
+use crate::stdlib::vec::Vec;
 use crate::{Error, Object, ObjectId, Result, Stream};
 
 #[cfg(feature = "rayon")]
@@ -29,7 +31,7 @@ impl ObjectStream {
 
         let index_block = stream.content.get(..first_offset).ok_or(Error::Offset(first_offset))?;
 
-        let numbers_str = std::str::from_utf8(index_block)?;
+        let numbers_str = str::from_utf8(index_block)?;
         let numbers: Vec<_> = numbers_str
             .split_whitespace()
             .map(|number| u32::from_str(number).ok())

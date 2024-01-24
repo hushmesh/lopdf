@@ -1,5 +1,6 @@
 use crate::stdlib::collections::BTreeMap;
 use crate::stdlib::string::String;
+use crate::stdlib::string::ToString;
 use crate::stdlib::vec::Vec;
 
 #[cfg(feature = "serde")]

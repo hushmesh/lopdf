@@ -21,16 +21,19 @@ chrono = { version = "^0.4", optional = true, features = [
     "clock",
 ], default-features = false }
 encoding_rs = "0.8.32"
-flate2 = "^1.0"
+flate2 = { version = "^1.0", optional = true }
 image = { version = "^0.24", optional = true }
 itoa = "^1.0"
 linked-hash-map = "^0.5"
 log = "^0.4"
 md5 = "0.7.0"
+miniz_oxide = { version = "^0.7.1", default-features = false, features = ["with-alloc"] }
+no_std_io = { version = "^0.5", features = ["alloc"] }
 nom = { version = "^7.1", optional = true }
 pom = { version = "^3.2", optional = true }
 rayon = { version = "^1.6", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
+spin = { version = "^0.9", default-features = false, features = ["mutex", "spin_mutex"] }
 time = { version = "^0.3", features = ["formatting", "parsing"] }
 weezl = "0.1"
 
@@ -48,27 +51,47 @@ embed_image = ["image"]
 nom_parser = ["nom"]
 pom_parser = ["pom"]
 serde = ["dep:serde"]
-std = []
+std = ["flate2"]
 
 [[example]]
 name = "add_barcode"
-required-features = ["pom_parser"]
+required-features = ["std", "pom_parser"]
+
+[[example]]
+name = "create"
+required-features = ["std", "pom_parser"]
 
 [[example]]
 name = "extract_toc"
-required-features = ["serde"]
+required-features = ["std", "serde"]
 
 [[example]]
 name = "extract_text"
-required-features = ["serde"]
+required-features = ["std", "serde"]
+
+[[example]]
+name = "merge"
+required-features = ["std"]
+
+[[example]]
+name = "print_annotations"
+required-features = ["std"]
 
 [[example]]
 name = "rotate"
-required-features = ["nom_parser"]
+required-features = ["std", "nom_parser"]
 
-[[tests]]
+[[test]]
+name = "annotation"
+required-features = ["std"]
+
+[[test]]
+name = "incremental_document"
+required-features = ["std"]
+
+[[test]]
 name = "modify"
-required-features = ["pom_parser"]
+required-features = ["std"]
 
 [badges]
 travis-ci = { repository = "J-F-Liu/lopdf" }

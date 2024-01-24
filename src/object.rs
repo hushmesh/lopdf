@@ -1,3 +1,4 @@
+use crate::stdlib::borrow::ToOwned;
 use crate::stdlib::cmp::max;
 use crate::stdlib::fmt;
 use crate::stdlib::str;
@@ -558,6 +559,7 @@ impl Stream {
         self.content = content;
     }
 
+    #[cfg(feature = "std")]
     pub fn compress(&mut self) -> Result<()> {
         use flate2::write::ZlibEncoder;
         use flate2::Compression;
@@ -567,6 +569,20 @@ impl Stream {
             let mut encoder = ZlibEncoder::new(Vec::new(), Compression::best());
             encoder.write_all(self.content.as_slice())?;
             let compressed = encoder.finish()?;
+            if compressed.len() + 19 < self.content.len() {
+                self.dict.set("Filter", "FlateDecode");
+                self.set_content(compressed);
+            }
+        }
+        Ok(())
+    }
+
+    #[cfg(not(feature = "std"))]
+    pub fn compress(&mut self) -> Result<()> {
+        use miniz_oxide::deflate::compress_to_vec;
+
+        if self.dict.get(b"Filter").is_err() {
+            let compressed = compress_to_vec(self.content.as_slice(), 9);
             if compressed.len() + 19 < self.content.len() {
                 self.dict.set("Filter", "FlateDecode");
                 self.set_content(compressed);
@@ -632,6 +648,7 @@ impl Stream {
         output
     }
 
+    #[cfg(feature = "std")]
     fn decompress_zlib(input: &[u8], params: Option<&Dictionary>) -> Result<Vec<u8>> {
         use flate2::read::ZlibDecoder;
         use std::io::prelude::*;
@@ -646,6 +663,22 @@ impl Stream {
             });
         }
         Self::decompress_predictor(output, params)
+    }
+
+    #[cfg(not(feature = "std"))]
+    fn decompress_zlib(input: &[u8], params: Option<&Dictionary>) -> Result<Vec<u8>> {
+        use miniz_oxide::inflate::decompress_to_vec_with_limit;
+
+        let len = input.len();
+        if len > 0 {
+            let decompressed = decompress_to_vec_with_limit(input, len * 2).unwrap_or_else(|err| {
+                warn!("{}", err);
+                vec![]
+            });
+            Self::decompress_predictor(decompressed, params)
+        } else {
+            Self::decompress_predictor(vec![], params)
+        }
     }
 
     fn decompress_predictor(mut data: Vec<u8>, params: Option<&Dictionary>) -> Result<Vec<u8>> {

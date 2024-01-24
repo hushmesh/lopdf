@@ -1,7 +1,12 @@
+use crate::stdlib::io::{Result, Write};
 use crate::stdlib::vec;
 use crate::stdlib::vec::Vec;
+
+#[cfg(feature = "std")]
 use std::fs::File;
-use std::io::{BufWriter, Result, Write};
+#[cfg(feature = "std")]
+use std::io::BufWriter;
+#[cfg(feature = "std")]
 use std::path::Path;
 
 use super::Object::*;
@@ -11,6 +16,7 @@ use crate::{xref::*, IncrementalDocument};
 impl Document {
     /// Save PDF document to specified file path.
     #[inline]
+    #[cfg(feature = "std")]
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> Result<File> {
         let mut file = BufWriter::new(File::create(path)?);
         self.save_internal(&mut file)?;
@@ -124,6 +130,7 @@ impl Document {
 
 impl IncrementalDocument {
     /// Save PDF document to specified file path.
+    #[cfg(feature = "std")]
     #[inline]
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> Result<File> {
         let mut file = BufWriter::new(File::create(path)?);
@@ -543,13 +550,16 @@ fn save_document() {
     doc.max_id = 12;
 
     // Create temporary folder to store file.
-    let temp_dir = tempfile::tempdir().unwrap();
-    let file_path = temp_dir.path().join("test_0_save.pdf");
-    doc.save(&file_path).unwrap();
-    // Check if file was created.
-    assert!(file_path.exists());
-    // Check if path is file
-    assert!(file_path.is_file());
-    // Check if the file is above 400 bytes (should be about 610 bytes)
-    assert!(file_path.metadata().unwrap().len() > 400);
+    #[cfg(feature = "std")]
+    {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_path = temp_dir.path().join("test_0_save.pdf");
+        doc.save(&file_path).unwrap();
+        // Check if file was created.
+        assert!(file_path.exists());
+        // Check if path is file
+        assert!(file_path.is_file());
+        // Check if the file is above 400 bytes (should be about 610 bytes)
+        assert!(file_path.metadata().unwrap().len() > 400);
+    }
 }

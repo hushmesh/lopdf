@@ -1,4 +1,6 @@
+use crate::stdlib::borrow::ToOwned;
 use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::string::ToString;
 use crate::stdlib::vec::Vec;
 
 use super::{Destination, Dictionary, Document, Error, Object, Result};

@@ -3,6 +3,8 @@ use crate::content::*;
 use crate::error::XrefError;
 use crate::reader::Reader;
 use crate::stdlib::str::{self, FromStr};
+use crate::stdlib::string::String;
+use crate::stdlib::vec::Vec;
 use crate::xref::*;
 use crate::Error;
 
@@ -557,6 +559,7 @@ BT
 T* (encoded streams.) Tj
 		";
         let content = tstrip(_content(stream));
+        #[cfg(feature = "std")]
         println!("{:?}", content);
         assert!(content.is_some());
     }

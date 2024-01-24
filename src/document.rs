@@ -3,14 +3,15 @@ use super::{Bookmark, Dictionary, Object, ObjectId};
 use crate::encryption;
 use crate::stdlib::cmp::max;
 use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::io::Write;
 use crate::stdlib::str;
 use crate::stdlib::string::String;
+use crate::stdlib::string::ToString;
 use crate::stdlib::vec::Vec;
 use crate::xref::{Xref, XrefType};
 use crate::{Error, Result, Stream};
 use encoding_rs::UTF_16BE;
 use log::info;
-use std::io::Write;
 
 /// A PDF document.
 ///

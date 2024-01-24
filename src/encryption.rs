@@ -23,7 +23,7 @@ pub enum DecryptionError {
     UnsupportedEncryption,
 }
 
-impl std::error::Error for DecryptionError {}
+impl crate::stdlib::error::Error for DecryptionError {}
 
 impl fmt::Display for DecryptionError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -241,6 +241,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::stdlib::str;
+    use crate::stdlib::string::String;
 
     #[test]
     fn rc4_works() {
@@ -259,7 +261,7 @@ mod tests {
             let cipher = cipher.as_bytes();
             let mut cipher_bytes = Vec::with_capacity(cipher.len() / 2);
             for hex_pair in cipher.chunks_exact(2) {
-                cipher_bytes.push(u8::from_str_radix(std::str::from_utf8(hex_pair).unwrap(), 16).unwrap());
+                cipher_bytes.push(u8::from_str_radix(str::from_utf8(hex_pair).unwrap(), 16).unwrap());
             }
 
             let decryptor = Rc4::new(key);

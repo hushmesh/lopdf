@@ -13,7 +13,7 @@ pub enum Error {
     /// Invalid file header
     Header,
     /// IO error
-    IO(std::io::Error),
+    IO(crate::stdlib::io::Error),
     /// Found Object ID does not match Expected Object ID.
     ObjectIdMismatch,
     /// The Object ID was not found.
@@ -80,7 +80,7 @@ impl fmt::Display for Error {
     }
 }
 
-impl std::error::Error for Error {}
+impl crate::stdlib::error::Error for Error {}
 
 #[derive(Debug)]
 pub enum XrefError {
@@ -105,12 +105,12 @@ impl fmt::Display for XrefError {
     }
 }
 
-impl std::error::Error for XrefError {}
+impl crate::stdlib::error::Error for XrefError {}
 
 pub type Result<T> = crate::stdlib::result::Result<T, Error>;
 
-impl From<std::io::Error> for Error {
-    fn from(err: std::io::Error) -> Self {
+impl From<crate::stdlib::io::Error> for Error {
+    fn from(err: crate::stdlib::io::Error) -> Self {
         Error::IO(err)
     }
 }

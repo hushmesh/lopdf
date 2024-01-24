@@ -130,6 +130,7 @@ impl Document {
 
 #[cfg(test)]
 pub mod tests {
+    #[cfg(feature = "std")]
     use std::path::PathBuf;
 
     use crate::content::*;
@@ -189,6 +190,7 @@ pub mod tests {
     }
 
     /// Save a document
+    #[cfg(feature = "std")]
     pub fn save_document(file_path: &PathBuf, doc: &mut Document) {
         let res = doc.save(file_path);
 
@@ -199,6 +201,14 @@ pub mod tests {
     }
 
     #[test]
+    fn save_to_created_document() {
+        let mut doc = create_document();
+        let mut buf = vec![];
+        assert!(doc.save_to(&mut buf).is_ok());
+    }
+
+    #[test]
+    #[cfg(feature = "std")]
     fn save_created_document() {
         // Create temporary folder to store file.
         let temp_dir = tempfile::tempdir().unwrap();

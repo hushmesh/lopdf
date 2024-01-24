@@ -1,7 +1,7 @@
 use crate::stdlib::convert::{TryFrom, TryInto};
+use crate::stdlib::io::{Error, ErrorKind, Read, Result, Write};
 use crate::stdlib::mem;
 use crate::stdlib::vec::Vec;
-use std::io::{Error, ErrorKind, Read, Result, Write};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FilterType {
@@ -101,10 +101,13 @@ pub fn decode_frame(content: &[u8], bytes_per_pixel: usize, pixels_per_row: usiz
             decoded.write_all(current.as_slice())?;
             mem::swap(&mut previous, &mut current);
         } else {
+            #[cfg(feature = "std")]
             return Err(Error::new(
                 ErrorKind::InvalidData,
                 format!("invalid PNG filter type ({})", content[pos]),
             ));
+            #[cfg(not(feature = "std"))]
+            return Err(Error::new(ErrorKind::InvalidData, "invalid PNG filter type"));
         }
     }
     Ok(decoded)

@@ -369,6 +369,7 @@ BT
 T* (encoded streams.) Tj
 		";
         let content = content(stream);
+        #[cfg(feature = "std")]
         println!("{:?}", content);
         assert!(content.is_some());
     }

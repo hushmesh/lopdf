@@ -1,6 +1,6 @@
 use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::io::{Result, Write};
 use crate::stdlib::vec::Vec;
-use std::io::{Result, Write};
 
 #[derive(Debug, Clone)]
 pub struct Xref {
