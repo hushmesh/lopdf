@@ -1,6 +1,8 @@
 use crate::rc4::Rc4;
+use crate::stdlib::cmp;
+use crate::stdlib::fmt;
+use crate::stdlib::vec::Vec;
 use crate::{Document, Object, ObjectId};
-use std::fmt;
 
 #[derive(Debug)]
 pub enum DecryptionError {
@@ -102,7 +104,7 @@ where
     // 3.2.1 Start building up the key, starting with the user password plaintext,
     //  padding as needed to 32 bytes
     let mut key = Vec::with_capacity(128);
-    let password_len = std::cmp::min(password.len(), 32);
+    let password_len = cmp::min(password.len(), 32);
     key.extend_from_slice(&password[0..password_len]);
     key.extend_from_slice(&PAD_BYTES[0..32 - password_len]);
 
@@ -221,7 +223,7 @@ where
     builder.extend_from_slice(&obj_id.1.to_le_bytes()[..2]);
 
     // Now construct the rc4 key
-    let key_len = std::cmp::min(key.len() + 5, 16);
+    let key_len = cmp::min(key.len() + 5, 16);
     let rc4_key = &md5::compute(builder)[..key_len];
 
     let encrypted = match obj {

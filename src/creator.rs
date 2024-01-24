@@ -1,3 +1,5 @@
+use crate::stdlib::string::String;
+use crate::stdlib::vec::Vec;
 use crate::{Dictionary, Document, Object, ObjectId};
 use crate::{Error, Result};
 

@@ -1,8 +1,8 @@
 #![cfg(any(feature = "pom_parser", feature = "nom_parser"))]
 
+use crate::stdlib::cmp;
+use crate::stdlib::collections::BTreeMap;
 use log::{error, warn};
-use std::cmp;
-use std::collections::BTreeMap;
 use std::convert::TryInto;
 use std::fs::File;
 use std::io::Read;
@@ -377,7 +377,7 @@ fn load_short_document() {
 
 #[test]
 fn load_many_shallow_brackets() {
-    let content: String = std::iter::repeat("()")
+    let content: String = crate::stdlib::iter::repeat("()")
         .take(MAX_BRACKET * 10)
         .flat_map(|x| x.chars())
         .collect();
@@ -423,9 +423,9 @@ startxref
 
 #[test]
 fn load_too_deep_brackets() {
-    let content: Vec<u8> = std::iter::repeat(b'(')
+    let content: Vec<u8> = crate::stdlib::iter::repeat(b'(')
         .take(MAX_BRACKET + 1)
-        .chain(std::iter::repeat(b')').take(MAX_BRACKET + 1))
+        .chain(crate::stdlib::iter::repeat(b')').take(MAX_BRACKET + 1))
         .collect();
     let content = String::from_utf8(content).unwrap();
     const STREAM_CRUFT: usize = 33;

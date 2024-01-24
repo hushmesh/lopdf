@@ -1,6 +1,7 @@
-use std::convert::{TryFrom, TryInto};
+use crate::stdlib::convert::{TryFrom, TryInto};
+use crate::stdlib::mem;
+use crate::stdlib::vec::Vec;
 use std::io::{Error, ErrorKind, Read, Result, Write};
-use std::mem;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FilterType {
@@ -14,7 +15,7 @@ pub enum FilterType {
 impl TryFrom<u8> for FilterType {
     type Error = ();
 
-    fn try_from(n: u8) -> std::result::Result<FilterType, ()> {
+    fn try_from(n: u8) -> crate::stdlib::result::Result<FilterType, ()> {
         match n {
             0 => Ok(FilterType::None),
             1 => Ok(FilterType::Sub),

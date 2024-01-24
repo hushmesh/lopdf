@@ -1,5 +1,6 @@
 #![cfg(any(feature = "pom_parser", feature = "nom_parser"))]
 
+use crate::stdlib::string::String;
 use crate::{
     content::{Content, Operation},
     document::Document,
@@ -123,7 +124,7 @@ impl Document {
                         .first()
                         .ok_or_else(|| Error::Syntax("missing font operand".to_string()))?
                         .as_name()?;
-                    current_encoding = encodings.get(current_font).map(std::string::String::as_str);
+                    current_encoding = encodings.get(current_font).map(String::as_str);
                 }
                 "Tj" => {
                     for bytes in operation.operands.iter_mut().flat_map(Object::as_str_mut) {

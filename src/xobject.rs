@@ -1,3 +1,4 @@
+use crate::stdlib::vec::Vec;
 use crate::*;
 use crate::{Dictionary, Stream};
 

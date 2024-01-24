@@ -1,4 +1,6 @@
 use super::Object;
+use crate::stdlib::string::String;
+
 #[cfg(feature = "chrono_time")]
 use chrono::prelude::*;
 

@@ -13,7 +13,7 @@ license = "MIT"
 name = "lopdf"
 readme = "README.md"
 repository = "https://github.com/J-F-Liu/lopdf.git"
-version = "0.32.0"
+version = "0.33.0"
 
 [dependencies]
 chrono = { version = "^0.4", optional = true, features = [
@@ -43,11 +43,12 @@ env_logger = "0.10"
 
 [features]
 chrono_time = ["chrono"]
-default = ["chrono_time", "nom_parser", "rayon"]
+default = ["chrono_time", "nom_parser", "rayon", "std"]
 embed_image = ["image"]
 nom_parser = ["nom"]
 pom_parser = ["pom"]
 serde = ["dep:serde"]
+std = []
 
 [[example]]
 name = "add_barcode"

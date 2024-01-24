@@ -1,6 +1,20 @@
+#![cfg_attr(not(feature = "std"), no_std)]
 #![doc = include_str!("../README.md")]
 #![forbid(unsafe_code)]
 #![deny(clippy::all)]
+
+#[cfg(feature = "std")]
+include!("./with_std.rs");
+
+#[cfg(not(feature = "std"))]
+include!("./without_std.rs");
+
+pub mod stdlib {
+    #[cfg(feature = "std")]
+    pub use crate::with_std::*;
+    #[cfg(not(feature = "std"))]
+    pub use crate::without_std::*;
+}
 
 #[macro_use]
 mod object;

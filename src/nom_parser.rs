@@ -2,9 +2,9 @@ use super::{Dictionary, Object, ObjectId, Stream, StringFormat};
 use crate::content::*;
 use crate::error::XrefError;
 use crate::reader::Reader;
+use crate::stdlib::str::{self, FromStr};
 use crate::xref::*;
 use crate::Error;
-use std::str::{self, FromStr};
 
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take, take_while, take_while1, take_while_m_n};
@@ -344,7 +344,8 @@ pub fn indirect_object(
 fn _indirect_object(
     input: &[u8], offset: usize, expected_id: Option<ObjectId>, reader: &Reader,
 ) -> crate::Result<(ObjectId, Object)> {
-    let (i, (_, object_id)) = terminated(tuple((space, object_id)), pair(tag(b"obj"), space))(input).map_err(|_| Error::Parse { offset })?;
+    let (i, (_, object_id)) =
+        terminated(tuple((space, object_id)), pair(tag(b"obj"), space))(input).map_err(|_| Error::Parse { offset })?;
     if let Some(expected_id) = expected_id {
         if object_id != expected_id {
             return Err(crate::error::Error::ObjectIdMismatch);

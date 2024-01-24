@@ -1,4 +1,6 @@
-use std::{collections::BTreeMap, usize};
+use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::string::String;
+use crate::stdlib::vec::Vec;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -102,7 +104,7 @@ impl Document {
                 if let Some(page_num) = page_id_to_page_numbers.get(&page_id) {
                     let s;
                     if title.len() < 2 {
-                        s = String::from_utf8_lossy(&title).to_string();
+                        s = crate::stdlib::string::String::from_utf8_lossy(&title).to_string();
                     } else if title[0] == 0xfe && title[1] == 0xff {
                         if title.len() & 1 != 0 {
                             toc.errors
@@ -128,7 +130,7 @@ impl Document {
                             .collect();
                         s = String::from_utf16_lossy(&t16);
                     } else {
-                        s = String::from_utf8_lossy(&title).to_string();
+                        s = crate::stdlib::string::String::from_utf8_lossy(&title).to_string();
                     }
                     toc.toc.push(TocType {
                         level,

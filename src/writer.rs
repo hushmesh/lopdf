@@ -1,7 +1,8 @@
+use crate::stdlib::vec;
+use crate::stdlib::vec::Vec;
 use std::fs::File;
 use std::io::{BufWriter, Result, Write};
 use std::path::Path;
-use std::vec;
 
 use super::Object::*;
 use super::{Dictionary, Document, Object, Stream, StringFormat};

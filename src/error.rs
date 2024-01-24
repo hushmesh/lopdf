@@ -1,5 +1,8 @@
-use std::fmt;
 use crate::encryption;
+use crate::stdlib::fmt;
+use crate::stdlib::str;
+use crate::stdlib::string;
+use crate::stdlib::string::String;
 
 #[derive(Debug)]
 pub enum Error {
@@ -104,7 +107,7 @@ impl fmt::Display for XrefError {
 
 impl std::error::Error for XrefError {}
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T> = crate::stdlib::result::Result<T, Error>;
 
 impl From<std::io::Error> for Error {
     fn from(err: std::io::Error) -> Self {
@@ -112,14 +115,14 @@ impl From<std::io::Error> for Error {
     }
 }
 
-impl From<std::string::FromUtf8Error> for Error {
-    fn from(_err: std::string::FromUtf8Error) -> Self {
+impl From<string::FromUtf8Error> for Error {
+    fn from(_err: string::FromUtf8Error) -> Self {
         Error::UTF8
     }
 }
 
-impl From<std::str::Utf8Error> for Error {
-    fn from(_err: std::str::Utf8Error) -> Self {
+impl From<str::Utf8Error> for Error {
+    fn from(_err: str::Utf8Error) -> Self {
         Error::UTF8
     }
 }

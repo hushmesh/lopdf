@@ -1,9 +1,11 @@
+use crate::stdlib::cmp::max;
+use crate::stdlib::fmt;
+use crate::stdlib::str;
+use crate::stdlib::string::String;
+use crate::stdlib::vec::Vec;
 use crate::{Document, Error, Result};
 use linked_hash_map::{self, Iter, IterMut, LinkedHashMap};
 use log::warn;
-use std::cmp::max;
-use std::fmt;
-use std::str;
 
 /// Object identifier consists of two parts: object number and generation number.
 pub type ObjectId = (u32, u16);
@@ -193,9 +195,9 @@ impl Object {
         }
     }
 
-    pub fn as_string(&self) -> Result<std::borrow::Cow<'_, str>> {
+    pub fn as_string(&self) -> Result<crate::stdlib::borrow::Cow<'_, str>> {
         match self {
-            Object::String(string, _) => Ok(std::string::String::from_utf8_lossy(string)),
+            Object::String(string, _) => Ok(String::from_utf8_lossy(string)),
             _ => Err(Error::Type),
         }
     }
@@ -272,7 +274,9 @@ impl fmt::Debug for Object {
             Object::Integer(ref value) => write!(f, "{}", *value),
             Object::Real(ref value) => write!(f, "{}", *value),
             Object::Name(ref name) => write!(f, "/{}", String::from_utf8_lossy(name)),
-            Object::String(ref text, StringFormat::Literal) => write!(f, "({})", String::from_utf8_lossy(text)),
+            Object::String(ref text, StringFormat::Literal) => {
+                write!(f, "({})", String::from_utf8_lossy(text))
+            }
             Object::String(ref text, StringFormat::Hexadecimal) => {
                 write!(f, "<")?;
                 for b in text {
@@ -478,7 +482,7 @@ impl<'a> IntoIterator for &'a Dictionary {
     }
 }
 
-use std::iter::FromIterator;
+use crate::stdlib::iter::FromIterator;
 impl<K: Into<Vec<u8>>> FromIterator<(K, Object)> for Dictionary {
     fn from_iter<I: IntoIterator<Item = (K, Object)>>(iter: I) -> Self {
         let mut dict = Dictionary::new();

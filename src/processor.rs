@@ -1,6 +1,7 @@
+use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::vec::Vec;
 use crate::Result;
 use crate::{Document, Object, ObjectId};
-use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
 

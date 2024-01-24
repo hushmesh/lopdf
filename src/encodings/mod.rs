@@ -1,6 +1,9 @@
 mod glyphnames;
 mod mappings;
 
+use crate::stdlib::string::String;
+use crate::stdlib::vec::Vec;
+
 pub use self::mappings::*;
 
 pub fn bytes_to_string(encoding: [Option<u16>; 256], bytes: &[u8]) -> String {
