@@ -1,14 +1,17 @@
 use super::encodings::{self, bytes_to_string, string_to_bytes};
 use super::{Bookmark, Dictionary, Object, ObjectId};
 use crate::encryption;
+use crate::stdlib::cmp::max;
+use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::io::Write;
+use crate::stdlib::str;
+use crate::stdlib::string::String;
+use crate::stdlib::string::ToString;
+use crate::stdlib::vec::Vec;
 use crate::xref::{Xref, XrefType};
 use crate::{Error, Result, Stream};
 use encoding_rs::UTF_16BE;
 use log::info;
-use std::cmp::max;
-use std::collections::{BTreeMap, HashMap};
-use std::io::Write;
-use std::str;
 
 /// A PDF document.
 ///
@@ -39,7 +42,7 @@ pub struct Document {
 
     /// used to locate a stored Bookmark so children can be appended to it via its id. Otherwise we
     /// need to do recursive lookups and returns on the bookmarks internal layout Vec
-    pub bookmark_table: HashMap<u32, Bookmark>,
+    pub bookmark_table: BTreeMap<u32, Bookmark>,
 
     /// The byte the cross-reference table starts at.
     /// This value is only set during reading, but not when writing the file.
@@ -59,7 +62,7 @@ impl Document {
             max_id: 0,
             max_bookmark_id: 0,
             bookmarks: Vec::new(),
-            bookmark_table: HashMap::new(),
+            bookmark_table: BTreeMap::new(),
             xref_start: 0,
         }
     }
@@ -76,7 +79,7 @@ impl Document {
             max_id: prev.max_id,
             max_bookmark_id: prev.max_bookmark_id,
             bookmarks: Vec::new(),
-            bookmark_table: HashMap::new(),
+            bookmark_table: BTreeMap::new(),
             xref_start: 0,
         }
     }
@@ -447,15 +450,9 @@ impl Document {
         ) {
             if let Ok(font) = resources.get(b"Font") {
                 let font_dict = match font {
-                    Object::Reference(ref id) => {
-                        doc.get_object(*id).and_then(Object::as_dict).ok()
-                    },
-                    Object::Dictionary(ref dict) => {
-                        Some(dict)
-                    },
-                    _ => {
-                        None
-                    }
+                    Object::Reference(ref id) => doc.get_object(*id).and_then(Object::as_dict).ok(),
+                    Object::Dictionary(ref dict) => Some(dict),
+                    _ => None,
                 };
                 if let Some(font_dict) = font_dict {
                     for (name, value) in font_dict.iter() {
@@ -660,4 +657,4 @@ impl Iterator for PageTreeIter<'_> {
     }
 }
 
-impl std::iter::FusedIterator for PageTreeIter<'_> {}
+impl crate::stdlib::iter::FusedIterator for PageTreeIter<'_> {}

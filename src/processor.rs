@@ -1,7 +1,11 @@
+use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::vec::Vec;
 use crate::Result;
 use crate::{Document, Object, ObjectId};
-use std::collections::BTreeMap;
+
+#[cfg(feature = "std")]
 use std::fs::File;
+#[cfg(feature = "std")]
 use std::io::Write;
 
 impl Document {
@@ -290,6 +294,7 @@ impl Document {
         Ok(())
     }
 
+    #[cfg(feature = "std")]
     pub fn extract_stream(&self, stream_id: ObjectId, decompress: bool) -> Result<()> {
         let mut file = File::create(format!("{:?}.bin", stream_id))?;
         if let Ok(Object::Stream(ref stream)) = self.get_object(stream_id) {

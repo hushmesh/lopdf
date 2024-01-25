@@ -1,3 +1,4 @@
+use crate::stdlib::vec::Vec;
 use crate::{Dictionary, Document, Error, Object, ObjectId, Result};
 
 #[derive(Debug, Clone)]

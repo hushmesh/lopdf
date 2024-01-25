@@ -16,9 +16,10 @@ jobs:
                     - stable
                     - beta
                     - nightly
-                    - "feat: no default features"
+                    - "feat: alloc"
                     - "feat: all features"
-                    - "feat: nom only"
+                    - "feat: nom only (std)"
+                    - "feat: nom only (alloc)"
 
                 include:
                     - name: beta
@@ -26,11 +27,14 @@ jobs:
                     - name: nightly
                       rust: nightly
                       continue-on-error: true
-
+                    - name: "feat: alloc"
+                      features: "--no-default-features --features alloc"
                     - name: "feat: all features"
                       features: "--all-features"
-                    - name: "feat: nom only"
-                      features: "--no-default-features --features nom_parser"
+                    - name: "feat: nom only (std)"
+                      features: "--no-default-features --features std,nom_parser"
+                    - name: "feat: nom only (alloc)"
+                      features: "--no-default-features --features alloc,nom_parser"
 
         steps:
             - uses: actions/checkout@v2

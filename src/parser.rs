@@ -2,12 +2,12 @@ use super::{Dictionary, Object, ObjectId, Stream, StringFormat};
 use crate::content::*;
 use crate::error::XrefError;
 use crate::reader::Reader;
+use crate::stdlib::cmp::max;
+use crate::stdlib::str::FromStr;
 use crate::xref::*;
 use crate::{Error, Result};
 use pom::char_class::{alpha, hex_digit, multispace, oct_digit};
 use pom::parser::*;
-use std::cmp::max;
-use std::str::{self, FromStr};
 
 fn eol<'a>() -> Parser<'a, u8, u8> {
     (sym(b'\r') * sym(b'\n')) | sym(b'\n') | sym(b'\r')
@@ -369,6 +369,7 @@ BT
 T* (encoded streams.) Tj
 		";
         let content = content(stream);
+        #[cfg(feature = "std")]
         println!("{:?}", content);
         assert!(content.is_some());
     }

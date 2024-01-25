@@ -1,4 +1,5 @@
-use std::collections::BTreeMap;
+use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::vec::Vec;
 
 use super::{Dictionary, Document, Object, Result};
 

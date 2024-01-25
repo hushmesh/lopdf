@@ -1,6 +1,23 @@
-#![doc = include_str!("../README.md")]
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "std", doc = include_str!("../README.md"))]
 #![forbid(unsafe_code)]
 #![deny(clippy::all)]
+
+#[cfg(not(any(feature = "alloc", feature = "std")))]
+compile_error!("feature \"alloc\" or feature \"std\" must be enabled");
+
+#[cfg(feature = "std")]
+include!("./with_std.rs");
+
+#[cfg(not(feature = "std"))]
+include!("./without_std.rs");
+
+mod stdlib {
+    #[cfg(feature = "std")]
+    pub use crate::with_std::*;
+    #[cfg(not(feature = "std"))]
+    pub use crate::without_std::*;
+}
 
 #[macro_use]
 mod object;

@@ -1,6 +1,8 @@
 // This module exists because the rust-crypto module is really old and not maintained.
 // Fortunately the RC4 algorithm is very simple to implement.
 
+use crate::stdlib::vec::Vec;
+
 ///
 pub struct Rc4 {
     initial_state: [u8; 256],

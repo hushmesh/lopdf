@@ -1,7 +1,10 @@
 use super::Object;
+use crate::stdlib::io::Write;
+use crate::stdlib::string::String;
+use crate::stdlib::string::ToString;
+use crate::stdlib::vec::Vec;
 use crate::writer::Writer;
 use crate::Result;
-use std::io::Write;
 
 #[derive(Debug, Clone)]
 pub struct Operation {

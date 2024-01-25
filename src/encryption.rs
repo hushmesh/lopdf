@@ -1,6 +1,8 @@
 use crate::rc4::Rc4;
+use crate::stdlib::cmp;
+use crate::stdlib::fmt;
+use crate::stdlib::vec::Vec;
 use crate::{Document, Object, ObjectId};
-use std::fmt;
 
 #[derive(Debug)]
 pub enum DecryptionError {
@@ -21,7 +23,7 @@ pub enum DecryptionError {
     UnsupportedEncryption,
 }
 
-impl std::error::Error for DecryptionError {}
+impl crate::stdlib::error::Error for DecryptionError {}
 
 impl fmt::Display for DecryptionError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -102,7 +104,7 @@ where
     // 3.2.1 Start building up the key, starting with the user password plaintext,
     //  padding as needed to 32 bytes
     let mut key = Vec::with_capacity(128);
-    let password_len = std::cmp::min(password.len(), 32);
+    let password_len = cmp::min(password.len(), 32);
     key.extend_from_slice(&password[0..password_len]);
     key.extend_from_slice(&PAD_BYTES[0..32 - password_len]);
 
@@ -221,7 +223,7 @@ where
     builder.extend_from_slice(&obj_id.1.to_le_bytes()[..2]);
 
     // Now construct the rc4 key
-    let key_len = std::cmp::min(key.len() + 5, 16);
+    let key_len = cmp::min(key.len() + 5, 16);
     let rc4_key = &md5::compute(builder)[..key_len];
 
     let encrypted = match obj {
@@ -239,6 +241,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::stdlib::str;
+    use crate::stdlib::string::String;
 
     #[test]
     fn rc4_works() {
@@ -257,7 +261,7 @@ mod tests {
             let cipher = cipher.as_bytes();
             let mut cipher_bytes = Vec::with_capacity(cipher.len() / 2);
             for hex_pair in cipher.chunks_exact(2) {
-                cipher_bytes.push(u8::from_str_radix(std::str::from_utf8(hex_pair).unwrap(), 16).unwrap());
+                cipher_bytes.push(u8::from_str_radix(str::from_utf8(hex_pair).unwrap(), 16).unwrap());
             }
 
             let decryptor = Rc4::new(key);

@@ -1,9 +1,12 @@
+use crate::stdlib::borrow::ToOwned;
+use crate::stdlib::cmp::max;
+use crate::stdlib::fmt;
+use crate::stdlib::str;
+use crate::stdlib::string::String;
+use crate::stdlib::vec::Vec;
 use crate::{Document, Error, Result};
 use linked_hash_map::{self, Iter, IterMut, LinkedHashMap};
 use log::warn;
-use std::cmp::max;
-use std::fmt;
-use std::str;
 
 /// Object identifier consists of two parts: object number and generation number.
 pub type ObjectId = (u32, u16);
@@ -193,9 +196,9 @@ impl Object {
         }
     }
 
-    pub fn as_string(&self) -> Result<std::borrow::Cow<'_, str>> {
+    pub fn as_string(&self) -> Result<crate::stdlib::borrow::Cow<'_, str>> {
         match self {
-            Object::String(string, _) => Ok(std::string::String::from_utf8_lossy(string)),
+            Object::String(string, _) => Ok(String::from_utf8_lossy(string)),
             _ => Err(Error::Type),
         }
     }
@@ -272,7 +275,9 @@ impl fmt::Debug for Object {
             Object::Integer(ref value) => write!(f, "{}", *value),
             Object::Real(ref value) => write!(f, "{}", *value),
             Object::Name(ref name) => write!(f, "/{}", String::from_utf8_lossy(name)),
-            Object::String(ref text, StringFormat::Literal) => write!(f, "({})", String::from_utf8_lossy(text)),
+            Object::String(ref text, StringFormat::Literal) => {
+                write!(f, "({})", String::from_utf8_lossy(text))
+            }
             Object::String(ref text, StringFormat::Hexadecimal) => {
                 write!(f, "<")?;
                 for b in text {
@@ -478,7 +483,7 @@ impl<'a> IntoIterator for &'a Dictionary {
     }
 }
 
-use std::iter::FromIterator;
+use crate::stdlib::iter::FromIterator;
 impl<K: Into<Vec<u8>>> FromIterator<(K, Object)> for Dictionary {
     fn from_iter<I: IntoIterator<Item = (K, Object)>>(iter: I) -> Self {
         let mut dict = Dictionary::new();
@@ -554,6 +559,7 @@ impl Stream {
         self.content = content;
     }
 
+    #[cfg(feature = "std")]
     pub fn compress(&mut self) -> Result<()> {
         use flate2::write::ZlibEncoder;
         use flate2::Compression;
@@ -563,6 +569,20 @@ impl Stream {
             let mut encoder = ZlibEncoder::new(Vec::new(), Compression::best());
             encoder.write_all(self.content.as_slice())?;
             let compressed = encoder.finish()?;
+            if compressed.len() + 19 < self.content.len() {
+                self.dict.set("Filter", "FlateDecode");
+                self.set_content(compressed);
+            }
+        }
+        Ok(())
+    }
+
+    #[cfg(not(feature = "std"))]
+    pub fn compress(&mut self) -> Result<()> {
+        use miniz_oxide::deflate::compress_to_vec;
+
+        if self.dict.get(b"Filter").is_err() {
+            let compressed = compress_to_vec(self.content.as_slice(), 9);
             if compressed.len() + 19 < self.content.len() {
                 self.dict.set("Filter", "FlateDecode");
                 self.set_content(compressed);
@@ -628,6 +648,7 @@ impl Stream {
         output
     }
 
+    #[cfg(feature = "std")]
     fn decompress_zlib(input: &[u8], params: Option<&Dictionary>) -> Result<Vec<u8>> {
         use flate2::read::ZlibDecoder;
         use std::io::prelude::*;
@@ -642,6 +663,22 @@ impl Stream {
             });
         }
         Self::decompress_predictor(output, params)
+    }
+
+    #[cfg(not(feature = "std"))]
+    fn decompress_zlib(input: &[u8], params: Option<&Dictionary>) -> Result<Vec<u8>> {
+        use miniz_oxide::inflate::decompress_to_vec_with_limit;
+
+        let len = input.len();
+        if len > 0 {
+            let decompressed = decompress_to_vec_with_limit(input, len * 2).unwrap_or_else(|err| {
+                warn!("{}", err);
+                vec![]
+            });
+            Self::decompress_predictor(decompressed, params)
+        } else {
+            Self::decompress_predictor(vec![], params)
+        }
     }
 
     fn decompress_predictor(mut data: Vec<u8>, params: Option<&Dictionary>) -> Result<Vec<u8>> {

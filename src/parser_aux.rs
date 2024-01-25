@@ -1,5 +1,12 @@
 #![cfg(any(feature = "pom_parser", feature = "nom_parser"))]
 
+use crate::stdlib::borrow::ToOwned;
+use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::io::Cursor;
+use crate::stdlib::io::Read;
+use crate::stdlib::string::String;
+use crate::stdlib::string::ToString;
+use crate::stdlib::vec::Vec;
 use crate::{
     content::{Content, Operation},
     document::Document,
@@ -10,10 +17,6 @@ use crate::{
 };
 use crate::{parser, Dictionary, Object, ObjectId, Stream};
 use log::info;
-use std::{
-    collections::BTreeMap,
-    io::{Cursor, Read},
-};
 
 impl Content<Vec<Operation>> {
     /// Decode content operations.
@@ -123,7 +126,7 @@ impl Document {
                         .first()
                         .ok_or_else(|| Error::Syntax("missing font operand".to_string()))?
                         .as_name()?;
-                    current_encoding = encodings.get(current_font).map(std::string::String::as_str);
+                    current_encoding = encodings.get(current_font).map(String::as_str);
                 }
                 "Tj" => {
                     for bytes in operation.operands.iter_mut().flat_map(Object::as_str_mut) {
@@ -286,6 +289,7 @@ fn parse_integer_array(array: &Object) -> Result<Vec<i64>> {
 }
 
 #[test]
+#[cfg(feature = "std")]
 fn load_and_save() {
     // test load_from() and save_to()
     use crate::creator::tests::{create_document, save_document};

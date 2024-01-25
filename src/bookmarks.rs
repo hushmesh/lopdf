@@ -1,5 +1,7 @@
 use super::{Dictionary, Document, Object, ObjectId};
-use std::collections::HashMap;
+use crate::stdlib::collections::BTreeMap;
+use crate::stdlib::string::String;
+use crate::stdlib::vec::Vec;
 
 #[derive(Debug, Clone)]
 pub struct Bookmark {
@@ -47,7 +49,7 @@ impl Document {
     }
 
     fn outline_child(
-        &self, maxid: &mut u32, parent: (ObjectId, &[u32]), processed: &mut HashMap<ObjectId, Dictionary>,
+        &self, maxid: &mut u32, parent: (ObjectId, &[u32]), processed: &mut BTreeMap<ObjectId, Dictionary>,
     ) -> (Option<ObjectId>, Option<ObjectId>, i64) {
         let mut first: Option<ObjectId> = None;
         let mut last: Option<ObjectId> = None;
@@ -110,7 +112,7 @@ impl Document {
     }
 
     pub fn build_outline(&mut self) -> Option<ObjectId> {
-        let mut processed: HashMap<ObjectId, Dictionary> = HashMap::new();
+        let mut processed: BTreeMap<ObjectId, Dictionary> = BTreeMap::new();
 
         if !self.bookmarks.is_empty() {
             let mut outline = Dictionary::new();
@@ -130,7 +132,7 @@ impl Document {
 
             outline.set("Count", Object::Integer(count));
 
-            for (obj_id, obj) in processed.drain() {
+            while let Some((obj_id, obj)) = processed.pop_first() {
                 self.objects.insert(obj_id, obj.into());
             }
 

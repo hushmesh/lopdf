@@ -415,6 +415,10 @@ use lopdf::Document;
 }
 ```
 
+## no_std
+
+In order to use the library in a no_std context default-features needs to be disabled. And alloc feature needs to be added.
+
 ## FAQ
 
 * Why does the library keep everything in memory as high-level objects until finally serializing the entire document?
