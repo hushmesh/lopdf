@@ -27,13 +27,13 @@ itoa = "^1.0"
 linked-hash-map = "^0.5"
 log = "^0.4"
 md5 = "0.7.0"
-miniz_oxide = { version = "^0.7.1", default-features = false, features = ["with-alloc"] }
-no_std_io = { version = "^0.5", features = ["alloc"] }
+miniz_oxide = { version = "^0.7.1", default-features = false, features = ["with-alloc"], optional = true }
+no_std_io = { version = "^0.5", features = ["alloc"], optional = true }
 nom = { version = "^7.1", optional = true }
 pom = { version = "^3.2", optional = true }
 rayon = { version = "^1.6", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
-spin = { version = "^0.9", default-features = false, features = ["mutex", "spin_mutex"] }
+spin = { version = "^0.9", default-features = false, features = ["mutex", "spin_mutex"], optional = true }
 time = { version = "^0.3", features = ["formatting", "parsing"] }
 weezl = "0.1"
 
@@ -44,6 +44,9 @@ clap = { version = "4.0", features = ["derive"] }
 shellexpand = "3.0"
 env_logger = "0.10"
 
+# 'std' or 'alloc' must be enabled
+# if 'std' and 'alloc' are enabled then 'std' is used
+
 [features]
 chrono_time = ["chrono"]
 default = ["chrono_time", "nom_parser", "rayon", "std"]
@@ -52,6 +55,7 @@ nom_parser = ["nom"]
 pom_parser = ["pom"]
 serde = ["dep:serde"]
 std = ["flate2"]
+alloc = ["miniz_oxide", "no_std_io", "spin"]
 
 [[example]]
 name = "add_barcode"

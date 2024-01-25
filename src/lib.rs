@@ -1,7 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![doc = include_str!("../README.md")]
+#![cfg_attr(feature = "std", doc = include_str!("../README.md"))]
 #![forbid(unsafe_code)]
 #![deny(clippy::all)]
+
+#[cfg(not(any(feature = "alloc", feature = "std")))]
+compile_error!("feature \"alloc\" or feature \"std\" must be enabled");
 
 #[cfg(feature = "std")]
 include!("./with_std.rs");

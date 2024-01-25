@@ -147,7 +147,6 @@ doc.compress();
 // Store file in current working directory.
 // Note: Line is excluded when running tests
 if false {
-    #[cfg(feature = "std")]
     doc.save("example.pdf").unwrap();
 }
 ```
@@ -389,7 +388,6 @@ fn main() -> std::io::Result<()> {
     // Store file in current working directory.
     // Note: Line is excluded when running tests
     if false {
-        #[cfg(feature = "std")]
         document.save("merged.pdf").unwrap();
     }
 
@@ -404,7 +402,6 @@ use lopdf::Document;
 
 // For this example to work a parser feature needs to be enabled
 #[cfg(any(feature = "pom_parser", feature = "nom_parser"))]
-#[cfg(feature = "std")]
 {
     let mut doc = Document::load("assets/example.pdf").unwrap();
 
