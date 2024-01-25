@@ -5,7 +5,8 @@ use crate::stdlib::str;
 use crate::stdlib::string::String;
 use crate::stdlib::vec::Vec;
 use crate::{Document, Error, Result};
-use linked_hash_map::{self, Iter, IterMut, LinkedHashMap};
+use hashlink::linked_hash_map::{self, Iter, IterMut};
+use hashlink::LinkedHashMap;
 use log::warn;
 
 /// Object identifier consists of two parts: object number and generation number.
