@@ -641,7 +641,7 @@ impl Stream {
     fn decompress_lzw_loop(input: &[u8], decoder: &mut weezl::decode::Decoder) -> Vec<u8> {
         let mut output = vec![];
 
-        let result = decoder.into_stream(&mut output).decode_all(input);
+        let result = decoder.into_vec(&mut output).decode_all(input);
         if let Err(err) = result.status {
             warn!("{}", err);
         }
