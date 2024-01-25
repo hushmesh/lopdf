@@ -63,7 +63,7 @@ required-features = ["std", "pom_parser"]
 
 [[example]]
 name = "create"
-required-features = ["std", "pom_parser"]
+required-features = ["std"]
 
 [[example]]
 name = "extract_toc"
@@ -95,7 +95,7 @@ required-features = ["std"]
 
 [[test]]
 name = "modify"
-required-features = ["std"]
+required-features = ["std", "pom_parser"]
 
 [badges]
 travis-ci = { repository = "J-F-Liu/lopdf" }
