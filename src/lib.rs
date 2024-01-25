@@ -21,6 +21,7 @@ mod stdlib {
 
 #[macro_use]
 mod object;
+#[cfg(feature = "std")]
 mod datetime;
 pub use crate::object::{Dictionary, Object, ObjectId, Stream, StringFormat};
 

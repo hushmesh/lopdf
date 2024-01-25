@@ -139,10 +139,16 @@ pub mod tests {
     /// Create and return a document for testing
     pub fn create_document() -> Document {
         let mut doc = Document::with_version("1.5");
+        #[cfg(feature = "std")]
         let info_id = doc.add_object(dictionary! {
             "Title" => Object::string_literal("Create PDF document example"),
             "Creator" => Object::string_literal("https://crates.io/crates/lopdf"),
             "CreationDate" => time::OffsetDateTime::now_utc(),
+        });
+        #[cfg(not(feature = "std"))]
+        let info_id = doc.add_object(dictionary! {
+            "Title" => Object::string_literal("Create PDF document example"),
+            "Creator" => Object::string_literal("https://crates.io/crates/lopdf"),
         });
         let pages_id = doc.new_object_id();
         let font_id = doc.add_object(dictionary! {

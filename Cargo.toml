@@ -34,7 +34,7 @@ pom = { version = "^3.2", optional = true }
 rayon = { version = "^1.6", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 spin = { version = "^0.9", default-features = false, features = ["mutex", "spin_mutex"], optional = true }
-time = { version = "^0.3", features = ["formatting", "parsing"] }
+time = { version = "^0.3", features = ["formatting", "parsing"], optional = true }
 weezl = { version = "^0.1", default-features = false, features = ["alloc"] }
 
 [dev-dependencies]
@@ -54,7 +54,7 @@ embed_image = ["image"]
 nom_parser = ["nom"]
 pom_parser = ["pom"]
 serde = ["dep:serde"]
-std = ["flate2"]
+std = ["flate2", "time"]
 alloc = ["miniz_oxide", "no_std_io", "spin"]
 
 [[example]]
