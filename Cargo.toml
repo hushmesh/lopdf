@@ -26,7 +26,7 @@ image = { version = "^0.24", optional = true }
 hashlink = "^0.9"
 itoa = "^1.0"
 log = "^0.4"
-md5 = "0.7.0"
+md5 = { version = "0.7.0", default-features = false }
 miniz_oxide = { version = "^0.7.1", default-features = false, features = ["with-alloc"], optional = true }
 no_std_io = { version = "^0.5", features = ["alloc"], optional = true }
 nom = { version = "^7.1", default-features = false, features = ["alloc"], optional = true }
