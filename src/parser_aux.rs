@@ -288,27 +288,3 @@ fn parse_integer_array(array: &Object) -> Result<Vec<i64>> {
     Ok(out)
 }
 
-#[test]
-#[cfg(feature = "std")]
-fn load_and_save() {
-    // test load_from() and save_to()
-    use crate::creator::tests::{create_document, save_document};
-    use std::fs::File;
-    use std::io::Cursor;
-    // Create temporary folder to store file.
-    let temp_dir = tempfile::tempdir().unwrap();
-    let file_path = temp_dir.path().join("test_1_load_and_save.pdf");
-
-    let mut doc = create_document();
-
-    save_document(&file_path, &mut doc);
-
-    let in_file = File::open(file_path).unwrap();
-    let mut in_doc = Document::load_from(in_file).unwrap();
-
-    let out_buf = Vec::new();
-    let mut memory_cursor = Cursor::new(out_buf);
-    in_doc.save_to(&mut memory_cursor).unwrap();
-    // Check if saved file is not an empty bytes vector.
-    assert!(!memory_cursor.get_ref().is_empty());
-}

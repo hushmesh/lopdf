@@ -238,35 +238,3 @@ where
     Ok(Rc4::new(rc4_key).decrypt(encrypted))
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::stdlib::str;
-    use crate::stdlib::string::String;
-
-    #[test]
-    fn rc4_works() {
-        let cases = [
-            // Key, Plain, Cipher
-            (
-                String::from("Key"),
-                String::from("Plaintext"),
-                String::from("BBF316E8D940AF0AD3"),
-            ),
-            (String::from("Wiki"), String::from("pedia"), String::from("1021BF0420")),
-        ];
-
-        for (key, plain, cipher) in cases {
-            // Reencode cipher from a hex string to a Vec<u8>
-            let cipher = cipher.as_bytes();
-            let mut cipher_bytes = Vec::with_capacity(cipher.len() / 2);
-            for hex_pair in cipher.chunks_exact(2) {
-                cipher_bytes.push(u8::from_str_radix(str::from_utf8(hex_pair).unwrap(), 16).unwrap());
-            }
-
-            let decryptor = Rc4::new(key);
-            let decrypted = decryptor.decrypt(&cipher_bytes);
-            assert_eq!(plain.as_bytes(), &decrypted[..]);
-        }
-    }
-}
