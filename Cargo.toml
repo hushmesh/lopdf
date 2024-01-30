@@ -37,13 +37,6 @@ spin = { version = "^0.9", default-features = false, features = ["mutex", "spin_
 time = { version = "^0.3", features = ["formatting", "parsing"], optional = true }
 weezl = { version = "^0.1", default-features = false, features = ["alloc"] }
 
-[dev-dependencies]
-tempfile = "3.3"
-serde_json = "1.0"
-clap = { version = "4.0", features = ["derive"] }
-shellexpand = "3.0"
-env_logger = "0.10"
-
 # 'std' or 'alloc' must be enabled
 # if 'std' and 'alloc' are enabled then 'std' is used
 
