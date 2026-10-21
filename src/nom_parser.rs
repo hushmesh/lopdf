@@ -254,23 +254,29 @@ fn null(input: &[u8]) -> NomResult<Object> {
     map(tag(b"null"), |_| Object::Null)(input)
 }
 
-fn array(input: &[u8]) -> NomResult<Vec<Object>> {
-    delimited(pair(tag(b"["), space), many0(_direct_object), tag(b"]"))(input)
+fn array(depth: usize) -> impl Fn(&[u8]) -> NomResult<Vec<Object>> {
+    move |input| delimited(pair(tag(b"["), space), many0(_direct_object(depth)), tag(b"]"))(input)
 }
 
 fn dictionary(input: &[u8]) -> NomResult<Dictionary> {
-    delimited(
-        pair(tag(b"<<"), space),
-        fold_many0(
-            pair(terminated(name, space), _direct_object),
-            Dictionary::new,
-            |mut dict, (key, value)| {
-                dict.set(key, value);
-                dict
-            },
-        ),
-        tag(b">>"),
-    )(input)
+    _dictionary(crate::reader::MAX_NESTING_DEPTH)(input)
+}
+
+fn _dictionary(depth: usize) -> impl Fn(&[u8]) -> NomResult<Dictionary> {
+    move |input| {
+        delimited(
+            pair(tag(b"<<"), space),
+            fold_many0(
+                pair(terminated(name, space), _direct_object(depth)),
+                Dictionary::new,
+                |mut dict, (key, value)| {
+                    dict.set(key, value);
+                    dict
+                },
+            ),
+            tag(b">>"),
+        )(input)
+    }
 }
 
 fn stream<'a>(input: &'a [u8], reader: &Reader) -> NomResult<'a, Object> {
@@ -306,31 +312,44 @@ fn reference(input: &[u8]) -> NomResult<Object> {
     map(terminated(object_id, tag(b"R")), Object::Reference)(input)
 }
 
-fn _direct_objects(input: &[u8]) -> NomResult<Object> {
-    alt((
-        null,
-        boolean,
-        reference,
-        map(real, Object::Real),
-        map(integer, Object::Integer),
-        map(name, Object::Name),
-        map(literal_string, Object::string_literal),
-        hexadecimal_string,
-        map(array, Object::Array),
-        map(dictionary, Object::Dictionary),
-    ))(input)
+fn _direct_objects(depth: usize) -> impl Fn(&[u8]) -> NomResult<Object> {
+    move |input| {
+        alt((
+            null,
+            boolean,
+            reference,
+            map(real, Object::Real),
+            map(integer, Object::Integer),
+            map(name, Object::Name),
+            map(literal_string, Object::string_literal),
+            hexadecimal_string,
+            map(array(depth), Object::Array),
+            map(_dictionary(depth), Object::Dictionary),
+        ))(input)
+    }
 }
 
-fn _direct_object(input: &[u8]) -> NomResult<Object> {
-    terminated(_direct_objects, space)(input)
+fn _direct_object(depth: usize) -> impl Fn(&[u8]) -> NomResult<Object> {
+    move |input| {
+        if depth == 0 {
+            return Err(nom::Err::Failure(()));
+        }
+        terminated(_direct_objects(depth - 1), space)(input)
+    }
 }
 
 pub fn direct_object(input: &[u8]) -> Option<Object> {
-    strip_nom(_direct_object(input))
+    strip_nom(_direct_object(crate::reader::MAX_NESTING_DEPTH)(input))
 }
 
 fn object<'a>(input: &'a [u8], reader: &Reader) -> NomResult<'a, Object> {
-    terminated(alt((|input| stream(input, reader), _direct_objects)), space)(input)
+    terminated(
+        alt((
+            |input| stream(input, reader),
+            _direct_objects(crate::reader::MAX_NESTING_DEPTH),
+        )),
+        space,
+    )(input)
 }
 
 pub fn indirect_object(
@@ -467,7 +486,7 @@ fn operand(input: &[u8]) -> NomResult<Object> {
             map(name, Object::Name),
             map(literal_string, Object::string_literal),
             hexadecimal_string,
-            map(array, Object::Array),
+            map(array(crate::reader::MAX_NESTING_DEPTH), Object::Array),
             map(dictionary, Object::Dictionary),
         )),
         content_space,
@@ -490,5 +509,62 @@ fn _content(input: &[u8]) -> NomResult<Content<Vec<Operation>>> {
 
 pub fn content(input: &[u8]) -> Option<Content<Vec<Operation>>> {
     strip_nom(_content(input))
+}
+
+#[cfg(all(test, feature = "std"))]
+mod tests {
+    use super::*;
+
+    fn on_big_stack(f: impl FnOnce() + Send + 'static) {
+        std::thread::Builder::new()
+            .stack_size(64 * 1024 * 1024)
+            .spawn(f)
+            .unwrap()
+            .join()
+            .unwrap();
+    }
+
+    #[test]
+    fn deeply_nested_array_is_rejected() {
+        on_big_stack(|| {
+            let depth = 200_000;
+            let mut input = Vec::with_capacity(depth * 2);
+            input.extend(std::iter::repeat(b'[').take(depth));
+            input.extend(std::iter::repeat(b']').take(depth));
+            assert!(direct_object(&input).is_none());
+        });
+    }
+
+    #[test]
+    fn deeply_nested_dictionary_is_rejected() {
+        on_big_stack(|| {
+            let depth = 200_000;
+            let mut input = Vec::with_capacity(depth * 7);
+            for _ in 0..depth {
+                input.extend_from_slice(b"<</K ");
+            }
+            for _ in 0..depth {
+                input.extend_from_slice(b">>");
+            }
+            assert!(direct_object(&input).is_none());
+        });
+    }
+
+    #[test]
+    fn deeply_nested_content_array_is_rejected() {
+        on_big_stack(|| {
+            let depth = 200_000;
+            let mut input = Vec::with_capacity(depth * 2 + 2);
+            input.extend(std::iter::repeat(b'[').take(depth));
+            input.extend(std::iter::repeat(b']').take(depth));
+            input.extend_from_slice(b" q");
+            assert!(content(&input).map_or(true, |c| c.operations.is_empty()));
+        });
+    }
+
+    #[test]
+    fn modestly_nested_array_still_parses() {
+        assert!(direct_object(b"[[[[[1]]]]]").is_some());
+    }
 }
 

@@ -137,6 +137,8 @@ pub struct Reader<'a> {
 /// Maximum allowed embedding of literal strings.
 pub const MAX_BRACKET: usize = 100;
 
+pub const MAX_NESTING_DEPTH: usize = 100;
+
 impl<'a> Reader<'a> {
     /// Read whole document.
     pub fn read(mut self, filter_func: Option<FilterFunc>) -> Result<Document> {
